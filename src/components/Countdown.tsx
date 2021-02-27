@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useChallenges } from '../contexts/ChallengesContext'
 
 import styles from '../styles/components/Countdown.module.css'
 
@@ -8,6 +9,8 @@ interface CountdownProps {
 
 export function Countdown(props: CountdownProps) {
   const { duration = 3 } = props
+
+  const {startNewChallenge} = useChallenges()
 
   const [time, setTime] = useState(duration)
   const [isActive, setIsActive] = useState(false)
@@ -34,9 +37,9 @@ export function Countdown(props: CountdownProps) {
         setTime((prevTime) => prevTime - 1)
       }, 1000)
     } else if (isActive && time === 0) {
-      console.log('Finalizou')
       setHasFinished(true)
       setIsActive(false)
+      startNewChallenge()
     }
   }, [isActive, time, hasFinished])
 
