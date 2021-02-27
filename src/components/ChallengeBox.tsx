@@ -1,10 +1,22 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { useChallenges } from '../contexts/ChallengesContext'
+import { useCountdown } from '../contexts/CountdownContext'
 
 import styles from '../styles/components/ChallengeBox.module.css'
 
 export function ChallengeBox() {
-  const { activeChallenge, resetChallenge } = useChallenges()
+  const { activeChallenge, resetChallenge, completeChallenge } = useChallenges()
+  const { resetCountdown } = useCountdown()
+
+  const handleChallengeFailed = useCallback(() => {
+    resetChallenge()
+    resetCountdown()
+  }, [resetChallenge, resetCountdown])
+
+  const handleChallengeSucceeded = useCallback(() => {
+    completeChallenge()
+    resetCountdown()
+  }, [completeChallenge, resetCountdown])
 
   return (
     <div className={styles.challengeBoxContainer}>
@@ -24,12 +36,16 @@ export function ChallengeBox() {
             <button
               type='button'
               className={styles.challengeFailedButton}
-              onClick={resetChallenge}
+              onClick={handleChallengeFailed}
             >
               Failed
             </button>
-            <button type='button' className={styles.challengeSucceededButton}>
-              Got it!
+            <button
+              type='button'
+              className={styles.challengeSucceededButton}
+              onClick={handleChallengeSucceeded}
+            >
+              Done!
             </button>
           </footer>
         </div>

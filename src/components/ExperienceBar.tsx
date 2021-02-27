@@ -7,7 +7,8 @@ export function ExperienceBar() {
   const {
     currentExperience,
     lastLevelExperience,
-    nextLevelExperience
+    nextLevelExperience,
+    level
   } = useChallenges()
 
   const percentageToNextLevel = useMemo(() => {
@@ -17,17 +18,27 @@ export function ExperienceBar() {
     )
   }, [lastLevelExperience, nextLevelExperience, currentExperience])
 
+  console.log({
+    currentExperience,
+    lastLevelExperience,
+    nextLevelExperience,
+    percentageToNextLevel,
+    level
+  })
+
   return (
     <header className={styles.experienceBar}>
       <span>0 xp</span>
       <div>
         <div style={{ width: `${percentageToNextLevel}%` }} />
-        <span
-          className={styles.currentExperience}
-          style={{ left: `${percentageToNextLevel}%` }}
-        >
-          {currentExperience - lastLevelExperience} xp
-        </span>
+        {!!(currentExperience - lastLevelExperience) && (
+          <span
+            className={styles.currentExperience}
+            style={{ left: `${percentageToNextLevel}%` }}
+          >
+            {currentExperience - lastLevelExperience} xp
+          </span>
+        )}
       </div>
       <span>{nextLevelExperience - lastLevelExperience} xp</span>
     </header>

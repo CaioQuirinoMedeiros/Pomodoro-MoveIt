@@ -1,22 +1,16 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useChallenges } from '../contexts/ChallengesContext'
+import React, { useMemo } from 'react'
+import { useCountdown } from '../contexts/CountdownContext'
 
 import styles from '../styles/components/Countdown.module.css'
 
-interface CountdownProps {
-  duration?: number
-}
-
-export function Countdown(props: CountdownProps) {
-  const { duration = 3 } = props
-
-  const {startNewChallenge} = useChallenges()
-
-  const [time, setTime] = useState(duration)
-  const [isActive, setIsActive] = useState(false)
-  const [hasFinished, setHasFinished] = useState(false)
-
-  const timeoutRef = useRef<NodeJS.Timeout>()
+export function Countdown() {
+  const {
+    time,
+    isActive,
+    hasFinished,
+    startCountdown,
+    resetCountdown
+  } = useCountdown()
 
   const minutesArray = useMemo(() => {
     return Math.floor(time / 60)
@@ -28,30 +22,6 @@ export function Countdown(props: CountdownProps) {
   const secondsArray = useMemo(() => {
     return (time % 60).toString().padStart(2, '0').split('')
   }, [time])
-
-  useEffect(() => {
-    if (hasFinished) return
-
-    if (isActive && time > 0) {
-      timeoutRef.current = setTimeout(() => {
-        setTime((prevTime) => prevTime - 1)
-      }, 1000)
-    } else if (isActive && time === 0) {
-      setHasFinished(true)
-      setIsActive(false)
-      startNewChallenge()
-    }
-  }, [isActive, time, hasFinished])
-
-  const startCountdown = useCallback(() => {
-    setIsActive(true)
-  }, [])
-
-  const resetCountdown = useCallback(() => {
-    setIsActive(false)
-    setTime(duration)
-    clearTimeout(timeoutRef.current)
-  }, [])
 
   return (
     <>
