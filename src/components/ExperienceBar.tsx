@@ -18,14 +18,6 @@ export function ExperienceBar() {
     )
   }, [lastLevelExperience, nextLevelExperience, currentExperience])
 
-  console.log({
-    currentExperience,
-    lastLevelExperience,
-    nextLevelExperience,
-    percentageToNextLevel,
-    level
-  })
-
   return (
     <header className={styles.experienceBar}>
       <span>0 xp</span>

@@ -2,9 +2,11 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState
 } from 'react'
+import Cookies from 'js-cookie'
 
 import challenges from '../../challenges.json'
 
@@ -20,7 +22,6 @@ interface ChallengesContextData {
   lastLevelExperience: number
   nextLevelExperience: number
   challengesCompleted: number
-  levelUp(): void
   startNewChallenge(): void
   activeChallenge: Challenge
   resetChallenge(): void
@@ -29,6 +30,8 @@ interface ChallengesContextData {
 
 interface ChallengesProviderProps {
   children: React.ReactNode
+  currentExperience: number
+  challengesCompleted: number
 }
 
 export const ChallengesContext = createContext({} as ChallengesContextData)
@@ -37,11 +40,13 @@ const getLevelExperience = (level: number) => {
   return Math.pow(level * 4, 2)
 }
 
-export function ChallengesProvider({ children }: ChallengesProviderProps) {
+export function ChallengesProvider(props: ChallengesProviderProps) {
   const [currentExperience, setCurrentExperience] = useState(
-    getLevelExperience(1)
+    props.currentExperience || getLevelExperience(1)
   )
-  const [challengesCompleted, setChallengesCompleted] = useState(0)
+  const [challengesCompleted, setChallengesCompleted] = useState(
+    props.challengesCompleted || 0
+  )
   const [activeChallenge, setActiveChallenge] = useState<Challenge>(null)
 
   const level = useMemo(() => {
@@ -55,12 +60,27 @@ export function ChallengesProvider({ children }: ChallengesProviderProps) {
     return level
   }, [currentExperience])
 
-  const levelUp = useCallback(() => {}, [])
+  useEffect(() => {
+    Notification.requestPermission()
+  }, [])
+
+  useEffect(() => {
+    Cookies.set('currentExperience', currentExperience.toString())
+    Cookies.set('challengesCompleted', challengesCompleted.toString())
+  }, [currentExperience, challengesCompleted])
 
   const startNewChallenge = useCallback(() => {
     const randomChallengeIndex = Math.floor(Math.random() * challenges.length)
     const challenge = challenges[randomChallengeIndex]
     setActiveChallenge(challenge as Challenge)
+
+    new Audio('/notification.mp3').play()
+
+    if (Notification.permission === 'granted') {
+      new Notification('Novo desafio 🎉', {
+        body: `Valendo ${challenge.amount} xp`
+      })
+    }
   }, [])
 
   const resetChallenge = useCallback(() => {
@@ -84,14 +104,13 @@ export function ChallengesProvider({ children }: ChallengesProviderProps) {
         nextLevelExperience: getLevelExperience(level + 1),
         lastLevelExperience: getLevelExperience(level),
         challengesCompleted,
-        levelUp,
         startNewChallenge,
         activeChallenge,
         resetChallenge,
         completeChallenge
       }}
     >
-      {children}
+      {props.children}
     </ChallengesContext.Provider>
   )
 }
